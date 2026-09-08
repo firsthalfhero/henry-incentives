@@ -1,0 +1,12 @@
+{
+  "name": "henry-earning-chart",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Henry's weekly earning chart — stateless frontend backed by a Netlify Function + Netlify Blobs.",
+  "dependencies": {
+    "@netlify/blobs": "^11.0.3"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

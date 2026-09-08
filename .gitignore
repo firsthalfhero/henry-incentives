@@ -1,0 +1,4 @@
+site/node_modules/
+site/.netlify/
+site/deploy-*.zip
+site/index.html
