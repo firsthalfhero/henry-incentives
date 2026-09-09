@@ -296,6 +296,20 @@
 
   .cal-legend{
     margin-top:14px;
+    padding:14px 16px 16px;
+    border:2px dashed var(--line);
+    border-radius:12px;
+  }
+  .cal-legend .legend-title{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .cal-legend .chips{
     display:flex;
     flex-wrap:wrap;
     gap:10px;
@@ -484,9 +498,12 @@
     </div>
 
     <div class="cal-legend">
-      <span class="chip t1"><span class="sw t1"></span>Days 1–3 · Getting going</span>
-      <span class="chip t2"><span class="sw t2"></span>Days 4–5 · Weekly target</span>
-      <span class="chip t3"><span class="sw t3"></span>Days 6–7 · Bonus</span>
+      <div class="legend-title">Streak legend</div>
+      <div class="chips">
+        <span class="chip t1"><span class="sw t1"></span>Days 1–3 · Getting going</span>
+        <span class="chip t2"><span class="sw t2"></span>Days 4–5 · Weekly target</span>
+        <span class="chip t3"><span class="sw t3"></span>Days 6–7 · Bonus</span>
+      </div>
     </div>
   </section>
 
