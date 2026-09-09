@@ -1,11 +1,14 @@
 import { getStore } from "@netlify/blobs";
+import activitiesData from "../../activities.json" with { type: "json" };
 
 // ---- shared config (kept identical to the chart's own numbers) ----
 const STORE_NAME = "henry-chart";
 const DOC_KEY = "state";
 const RATES = [2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00]; // one per activity, Mon..Sun max
 const SPEND_CAP = 40;
-const ACTIVITIES = ["violin", "school", "reading"];
+// Activity keys come from activities.json (the same file the page fetches),
+// capped at 6 so a stray extra entry can't silently break the ticks shape.
+const ACTIVITIES = activitiesData.slice(0, 6).map((a) => a.key);
 const MAX_WRITE_ATTEMPTS = 6;
 
 function isoWeekKey(date) {
