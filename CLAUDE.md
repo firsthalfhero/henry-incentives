@@ -62,10 +62,10 @@ Netlify Blobs store (`getStore("henry-chart")`, key `"state"`):
   **no history entry is written for this natural rollover**, only an explicit reset does
   that.
 - On `reset`, the *server* (not the client) recomputes that week's total/spend/savings
-  from the stored ticks — using the same `RATES`/`SPEND_CAP` constants duplicated at the
-  top of `state.mjs` (must be kept in sync with the matching constants in
-  `index.template.html`'s `<script>`) — appends a history entry, clears ticks, and
-  advances the week.
+  from the stored ticks — using the same rate schedule (from `activities.json`'s
+  `baseRate`/`increment`, per-activity `multiplier`) and `SPEND_CAP` (still a constant
+  duplicated at the top of `state.mjs`, kept in sync with `index.template.html`'s
+  `<script>`) — appends a history entry, clears ticks, and advances the week.
 - History is written but **never returned to the client** and **never shown in the UI**,
   per George's explicit preference. To read it, use the Netlify CLI directly:
   `netlify blobs:get henry-chart state --output state.json` (run from `site/`).
@@ -78,26 +78,34 @@ fetched at `/activities.json`) and also imported directly by `state.mjs`. It's t
 source of truth: nothing about the activities is hardcoded in `index.template.html` or
 `state.mjs` any more.
 
-Each entry:
+The file is one JSON object, not a bare array:
 
 ```json
 {
-  "key": "reading",       // stable id — used as the ticks key, must be unique
-  "name": "Reading",      // shown as the card title and calendar row label
-  "duration": "1 hour",   // free text next to the clock icon
-  "note": "a proper stretch — you'll need to start before \"reading time\"",
-  "color": "#3F7D53",     // card border / accent colour (hex)
-  "tint": "#DEEBE1",      // card background (hex, a pale version of color)
-  "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\">...</svg>"   // optional
+  "baseRate": 2.00,
+  "increment": 0.50,
+  "activities": [
+    {
+      "key": "reading",       // stable id — used as the ticks key, must be unique
+      "name": "Reading",      // shown as the card title and calendar row label
+      "duration": "1 hour",   // free text next to the clock icon
+      "note": "a proper stretch — you'll need to start before \"reading time\"",
+      "color": "#3F7D53",     // card border / accent colour (hex)
+      "tint": "#DEEBE1",      // card background (hex, a pale version of color)
+      "multiplier": 1,        // optional, default 1 — see "Pay rate & multiplier" below
+      "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\">...</svg>"   // optional
+    }
+  ]
 }
 ```
 
-- **2 to 6 activities** are supported. `index.template.html` fetches the file client-side
-  and renders both the "ways to earn" cards and the calendar rows from it; `state.mjs`
-  imports it at build time (`import activitiesData from "../../activities.json" with {
-  type: "json" }`) and derives its own activity-key list from it, capped at 6 with
-  `.slice(0, 6)` as a safety net. Add, remove, or reorder activities by editing this one
-  file — no other code changes needed as long as each `key` is unique.
+- **2 to 6 activities** are supported, listed under `activities`. `index.template.html`
+  fetches the file client-side and renders both the "ways to earn" cards and the calendar
+  rows from it; `state.mjs` imports it at build time (`import activitiesData from
+  "../../activities.json" with { type: "json" }`) and derives its own activity-key list
+  from `activitiesData.activities`, capped at 6 with `.slice(0, 6)` as a safety net. Add,
+  remove, or reorder activities by editing this one file — no other code changes needed as
+  long as each `key` is unique.
 - The card grid is responsive: 2 or 3 activities show in that many columns; 4 shows as
   2×2; 5 or 6 show as rows of 3. This is computed in `index.template.html`'s
   `earnerColumns()` function.
@@ -107,9 +115,22 @@ Each entry:
   (`.earner svg` / `.cal-row-label svg`), with the stroke colour baked in as a literal hex
   value (not a CSS variable) so any activity's icon is self-contained regardless of its
   colour.
-- `RATES` (the day-1..7 pay escalation) and `SPEND_CAP` are **not** part of
-  `activities.json` — they're shared across all activities and still live as constants in
-  both `index.template.html` and `state.mjs` (see "Things to keep in sync" below).
+
+### Pay rate & multiplier
+
+- `baseRate` and `increment` (top-level, shared across all activities) define the day-1..7
+  pay schedule: day *i* (1-indexed) pays `baseRate + (i − 1) × increment`. With the
+  defaults above that's $2.00, $2.50, $3.00 … up to $5.00 on day 7 — the same schedule as
+  before, just no longer hardcoded. Change `baseRate` to shift the whole schedule up or
+  down; change `increment` to make it climb faster or slower.
+- Each activity's own `multiplier` scales its result: `1` (or omitting the field) is the
+  standard rate, `1.5` pays that activity 50% more than the schedule, `0.5` pays half.
+  It applies to every day of that activity independently — e.g. with the defaults, a
+  `0.5`-multiplier activity pays $1.00/$1.25/$1.50… instead of $2.00/$2.50/$3.00…
+- Both the client (`index.template.html`, in `buildRates()`/`computeRow()`) and the server
+  (`state.mjs`, in `buildRates()`/`computeTotals()`) derive their rate table and apply the
+  multiplier the same way from the same `activities.json` — this is no longer duplicated
+  by hand in two files the way `SPEND_CAP` still is (see "Things to keep in sync" below).
 
 ## The CHART_API_KEY build step
 
@@ -129,17 +150,21 @@ If you ever need to rotate the key: `netlify env:set CHART_API_KEY <new value>`,
 redeploy (`netlify deploy --prod`, or push to `master` if the repo is git-linked — see
 Deploying below). No code or template change needed.
 
-## Rates, tiers, cap (must match in both `index.template.html` and `state.mjs`)
+## Rates, tiers, cap
 
-- `RATES = [2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00]` — one per activity, day 1..7 of
-  that activity's week (Monday first). Max $24.50/activity/week.
+- The day 1..7 rate schedule comes from `activities.json`'s `baseRate`/`increment` (see
+  "Pay rate & multiplier" above), scaled per activity by its `multiplier`. With the
+  defaults ($2.00 base, $0.50 increment, multiplier 1) that's the same $2.00 → $5.00
+  schedule as before — max $24.50/activity/week before any multiplier.
 - Tiers, per activity, by how many days of *that activity* are ticked so far this week:
   days 1–3 = Tier 1 "Getting going" (cool slate), days 4–5 = Tier 2 "Weekly target"
-  (gold), days 6–7 = Tier 3 "Bonus" (plum, dashed border).
-- `SPEND_CAP = 40` — anything earned over $40/week across all activities combined goes
-  to savings instead of spending money.
-- Three activities run fully independently (not pooled) — this was a deliberate fix so
-  Henry can't hit his weekly target using only two activities and skip violin.
+  (gold), days 6–7 = Tier 3 "Bonus" (plum, dashed border). Tiers are based on which day
+  it is, not the dollar amount, so they're unaffected by `multiplier`.
+- `SPEND_CAP = 40` — anything earned over $40/week across *all* activities combined goes
+  to savings instead of spending money. This is still a plain constant, duplicated in
+  `index.template.html` and `state.mjs` (see "Things to keep in sync" below).
+- All activities run fully independently (not pooled) — ticking one doesn't cover
+  skipping another; each has its own weekly rate schedule.
 
 ## Local dev
 
@@ -208,15 +233,17 @@ triggers the same build-and-deploy automatically — no `netlify deploy` needed.
 
 ## Things to keep in sync when editing
 
-Any change to the rate table, tier boundaries, or spending cap needs to be made in
-**both** `site/index.template.html` (the `<script>` block near the top: `RATES`,
-`SPEND_CAP`) and `site/netlify/functions/state.mjs` (top of file: same constants) —
-they're intentionally duplicated rather than shared, since the server independently
-recomputes totals for the reset history rather than trusting the client.
+`SPEND_CAP` is the only thing still duplicated by hand: **both**
+`site/index.template.html` and `site/netlify/functions/state.mjs` declare
+`SPEND_CAP = 40` at the top of the file — kept in sync manually, since the server
+independently recomputes totals for the reset history rather than trusting the client.
+(The 1–3 / 4–5 / 6–7 tier boundaries are purely a client-side display thing — coloured
+via `tierFor()` in `index.template.html` — the server doesn't need them.)
 
-The list of activities itself is **not** duplicated — both files read it from
-`site/activities.json` (see "Activities" above), so adding/removing/renaming an activity
-only means editing that one file.
+Everything else — the activity list, `baseRate`, `increment`, and each activity's
+`multiplier` — is **not** duplicated. Both files read it from `site/activities.json` (see
+"Activities" above), so changing the pay schedule, adding/removing/renaming an activity,
+or adjusting a multiplier only means editing that one file.
 
 The old `henry-earning-chart.html` (single-device, localStorage-based) and the
 Claude-hosted artifact it was published from are both stale snapshots now that `site/` is

@@ -511,7 +511,7 @@
   var API_URL = '/api/state';
 
   var DAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  var RATES = [2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00]; // must match netlify/functions/state.mjs
+  var RATES = []; // populated from /activities.json on load (baseRate + increment per day)
   var SPEND_CAP = 40;
 
   var ACTIVITIES = []; // populated from /activities.json on load
@@ -555,14 +555,27 @@
     return 't3';
   }
 
+  function activityFor(key){
+    for(var i = 0; i < ACTIVITIES.length; i++){
+      if(ACTIVITIES[i].key === key) return ACTIVITIES[i];
+    }
+    return null;
+  }
+
+  function multiplierFor(key){
+    var a = activityFor(key);
+    return (a && typeof a.multiplier === 'number') ? a.multiplier : 1;
+  }
+
   function computeRow(key){
     var ticks = state.ticks[key];
+    var mult = multiplierFor(key);
     var rank = 0;
     var cells = ticks.map(function(on){
       if(!on) return { on:false };
       var idx = rank; // 0-based rank for this ticked day
       rank++;
-      return { on:true, amt: RATES[idx], tier: tierFor(idx) };
+      return { on:true, amt: RATES[idx] * mult, tier: tierFor(idx) };
     });
     var subtotal = cells.reduce(function(s,c){ return c.on ? s + c.amt : s; }, 0);
     return { cells: cells, subtotal: subtotal };
@@ -605,6 +618,14 @@
     earnersEl.innerHTML = html;
   }
 
+  function buildRates(baseRate, increment){
+    var rates = [];
+    for(var i = 0; i < 7; i++){
+      rates.push(Math.round((baseRate + i * increment) * 100) / 100);
+    }
+    return rates;
+  }
+
   function loadActivities(){
     return fetch('/activities.json')
       .then(function(res){
@@ -612,7 +633,10 @@
         return res.json();
       })
       .then(function(data){
-        ACTIVITIES = (Array.isArray(data) ? data : []).slice(0, 6);
+        var baseRate = (data && typeof data.baseRate === 'number') ? data.baseRate : 2;
+        var increment = (data && typeof data.increment === 'number') ? data.increment : 0.5;
+        RATES = buildRates(baseRate, increment);
+        ACTIVITIES = (data && Array.isArray(data.activities) ? data.activities : []).slice(0, 6);
         renderEarners();
       })
       .catch(function(err){

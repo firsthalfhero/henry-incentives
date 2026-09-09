@@ -1,29 +1,36 @@
-[
-  {
-    "key": "violin",
-    "name": "Violin practice",
-    "duration": "15 min",
-    "note": "a proper practice, not just tuning up",
-    "color": "#9A4B2E",
-    "tint": "#F3E2D8",
-    "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\"><circle cx=\"17\" cy=\"5\" r=\"3\" stroke=\"#9A4B2E\" stroke-width=\"2\"/><line x1=\"15\" y1=\"8\" x2=\"15\" y2=\"17\" stroke=\"#9A4B2E\" stroke-width=\"2\"/><line x1=\"19\" y1=\"8\" x2=\"19\" y2=\"17\" stroke=\"#9A4B2E\" stroke-width=\"2\"/><path d=\"M9,17 C9,13 13,12 17,14 C21,12 25,13 25,17 C25,22 20,24 18,27 C20,30 18,34 15,32.5 C12,34 10,30 12,27 C10,24 9,22 9,17 Z\" stroke=\"#9A4B2E\" stroke-width=\"2\" stroke-linejoin=\"round\"/><path d=\"M14,20 q2,2 0,5\" stroke=\"#9A4B2E\" stroke-width=\"1.4\"/><path d=\"M20,20 q-2,2 0,5\" stroke=\"#9A4B2E\" stroke-width=\"1.4\"/></svg>"
-  },
-  {
-    "key": "school",
-    "name": "Schoolwork",
-    "duration": "30 min",
-    "note": "maths online (IXL or similar), or an agreed offline task",
-    "color": "#2E6F9E",
-    "tint": "#DCEAF3",
-    "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\"><rect x=\"6\" y=\"4\" width=\"22\" height=\"28\" rx=\"3\" stroke=\"#2E6F9E\" stroke-width=\"2\"/><rect x=\"11\" y=\"1\" width=\"12\" height=\"6\" rx=\"2\" stroke=\"#2E6F9E\" stroke-width=\"2\" fill=\"#EEF1EA\"/><path d=\"M12,17 L16,21 L24,11\" stroke=\"#2E6F9E\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><line x1=\"11\" y1=\"26\" x2=\"23\" y2=\"26\" stroke=\"#2E6F9E\" stroke-width=\"1.6\"/></svg>"
-  },
-  {
-    "key": "reading",
-    "name": "Reading",
-    "duration": "1 hour",
-    "note": "a proper stretch — you'll need to start before \"reading time\"",
-    "color": "#3F7D53",
-    "tint": "#DEEBE1",
-    "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\"><path d=\"M4,10 C4,8 9,7 17,9 C25,7 30,8 30,10 L30,29 C25,27 25,27 17,29 C9,27 9,27 4,29 Z\" stroke=\"#3F7D53\" stroke-width=\"2\" stroke-linejoin=\"round\"/><line x1=\"17\" y1=\"9\" x2=\"17\" y2=\"29\" stroke=\"#3F7D53\" stroke-width=\"2\"/><line x1=\"8\" y1=\"14\" x2=\"13\" y2=\"13.4\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/><line x1=\"8\" y1=\"18\" x2=\"13\" y2=\"17.6\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/><line x1=\"21\" y1=\"13.4\" x2=\"26\" y2=\"14\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/><line x1=\"21\" y1=\"17.6\" x2=\"26\" y2=\"18\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/></svg>"
-  }
-]
+{
+  "baseRate": 2.0,
+  "increment": 0.5,
+  "activities": [
+    {
+      "key": "violin",
+      "name": "Violin practice",
+      "duration": "15 min",
+      "note": "a proper practice, not just tuning up",
+      "color": "#9A4B2E",
+      "tint": "#F3E2D8",
+      "multiplier": 1,
+      "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\"><circle cx=\"17\" cy=\"5\" r=\"3\" stroke=\"#9A4B2E\" stroke-width=\"2\"/><line x1=\"15\" y1=\"8\" x2=\"15\" y2=\"17\" stroke=\"#9A4B2E\" stroke-width=\"2\"/><line x1=\"19\" y1=\"8\" x2=\"19\" y2=\"17\" stroke=\"#9A4B2E\" stroke-width=\"2\"/><path d=\"M9,17 C9,13 13,12 17,14 C21,12 25,13 25,17 C25,22 20,24 18,27 C20,30 18,34 15,32.5 C12,34 10,30 12,27 C10,24 9,22 9,17 Z\" stroke=\"#9A4B2E\" stroke-width=\"2\" stroke-linejoin=\"round\"/><path d=\"M14,20 q2,2 0,5\" stroke=\"#9A4B2E\" stroke-width=\"1.4\"/><path d=\"M20,20 q-2,2 0,5\" stroke=\"#9A4B2E\" stroke-width=\"1.4\"/></svg>"
+    },
+    {
+      "key": "school",
+      "name": "Schoolwork",
+      "duration": "30 min",
+      "note": "maths online (IXL or similar), or an agreed offline task",
+      "color": "#2E6F9E",
+      "tint": "#DCEAF3",
+      "multiplier": 1,
+      "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\"><rect x=\"6\" y=\"4\" width=\"22\" height=\"28\" rx=\"3\" stroke=\"#2E6F9E\" stroke-width=\"2\"/><rect x=\"11\" y=\"1\" width=\"12\" height=\"6\" rx=\"2\" stroke=\"#2E6F9E\" stroke-width=\"2\" fill=\"#EEF1EA\"/><path d=\"M12,17 L16,21 L24,11\" stroke=\"#2E6F9E\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><line x1=\"11\" y1=\"26\" x2=\"23\" y2=\"26\" stroke=\"#2E6F9E\" stroke-width=\"1.6\"/></svg>"
+    },
+    {
+      "key": "reading",
+      "name": "Reading",
+      "duration": "1 hour",
+      "note": "a proper stretch — you'll need to start before \"reading time\"",
+      "color": "#3F7D53",
+      "tint": "#DEEBE1",
+      "multiplier": 1,
+      "icon": "<svg viewBox=\"0 0 34 40\" fill=\"none\"><path d=\"M4,10 C4,8 9,7 17,9 C25,7 30,8 30,10 L30,29 C25,27 25,27 17,29 C9,27 9,27 4,29 Z\" stroke=\"#3F7D53\" stroke-width=\"2\" stroke-linejoin=\"round\"/><line x1=\"17\" y1=\"9\" x2=\"17\" y2=\"29\" stroke=\"#3F7D53\" stroke-width=\"2\"/><line x1=\"8\" y1=\"14\" x2=\"13\" y2=\"13.4\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/><line x1=\"8\" y1=\"18\" x2=\"13\" y2=\"17.6\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/><line x1=\"21\" y1=\"13.4\" x2=\"26\" y2=\"14\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/><line x1=\"21\" y1=\"17.6\" x2=\"26\" y2=\"18\" stroke=\"#3F7D53\" stroke-width=\"1.4\"/></svg>"
+    }
+  ]
+}

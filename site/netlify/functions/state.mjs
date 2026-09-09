@@ -4,11 +4,31 @@ import activitiesData from "../../activities.json" with { type: "json" };
 // ---- shared config (kept identical to the chart's own numbers) ----
 const STORE_NAME = "henry-chart";
 const DOC_KEY = "state";
-const RATES = [2.00, 2.50, 3.00, 3.50, 4.00, 4.50, 5.00]; // one per activity, Mon..Sun max
 const SPEND_CAP = 40;
-// Activity keys come from activities.json (the same file the page fetches),
-// capped at 6 so a stray extra entry can't silently break the ticks shape.
-const ACTIVITIES = activitiesData.slice(0, 6).map((a) => a.key);
+const RATE_DAYS = 7; // Mon..Sun
+
+// The day-by-day pay schedule (day 1 = baseRate, each following day adds
+// increment) and the activity list both come from activities.json — the
+// same file the page fetches — so nothing here is hardcoded any more.
+function buildRates(baseRate, increment) {
+  const rates = [];
+  for (let i = 0; i < RATE_DAYS; i++) {
+    rates.push(Number((baseRate + i * increment).toFixed(2)));
+  }
+  return rates;
+}
+const RATES = buildRates(activitiesData.baseRate, activitiesData.increment);
+
+// Activity keys come from activities.json, capped at 6 so a stray extra
+// entry can't silently break the ticks shape.
+const ACTIVITY_LIST = activitiesData.activities.slice(0, 6);
+const ACTIVITIES = ACTIVITY_LIST.map((a) => a.key);
+const ACTIVITY_BY_KEY = {};
+ACTIVITY_LIST.forEach((a) => { ACTIVITY_BY_KEY[a.key] = a; });
+function multiplierFor(key) {
+  const m = ACTIVITY_BY_KEY[key] && ACTIVITY_BY_KEY[key].multiplier;
+  return typeof m === "number" ? m : 1;
+}
 const MAX_WRITE_ATTEMPTS = 6;
 
 function isoWeekKey(date) {
@@ -35,10 +55,11 @@ function isValidTicks(ticks) {
 function computeTotals(ticks) {
   let total = 0;
   ACTIVITIES.forEach((key) => {
+    const mult = multiplierFor(key);
     let rank = 0;
     (ticks[key] || []).forEach((on) => {
       if (on) {
-        total += RATES[rank];
+        total += RATES[rank] * mult;
         rank++;
       }
     });
