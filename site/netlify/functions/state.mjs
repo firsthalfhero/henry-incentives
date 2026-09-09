@@ -102,21 +102,28 @@ async function readCurrent(store) {
   return {
     data: result ? result.data : null,
     etag: result ? result.etag : undefined,
+    existed: !!result,
   };
 }
 
-function writeOptionsFor(etag) {
-  return etag ? { onlyIfMatch: etag } : { onlyIfNew: true };
+// Whether a doc already existed at read time (not whether an etag came
+// back) decides onlyIfNew vs onlyIfMatch — Netlify's local sandbox Blobs
+// emulator returns data without an etag, so keying off the etag's presence
+// would treat every local write after the first as "creating a new doc"
+// and fail it against the one already there.
+function writeOptionsFor(existed, etag) {
+  if (!existed) return { onlyIfNew: true };
+  return etag ? { onlyIfMatch: etag } : {};
 }
 
 // Read-modify-write with retry. `mutate` receives the current (already
 // week-rolled) state and returns the new state to save.
 async function updateState(store, mutate) {
   for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt++) {
-    const { data, etag } = await readCurrent(store);
+    const { data, etag, existed } = await readCurrent(store);
     const current = rolledForNow(normalize(data));
     const next = mutate(current);
-    const { modified } = await store.setJSON(DOC_KEY, next, writeOptionsFor(etag));
+    const { modified } = await store.setJSON(DOC_KEY, next, writeOptionsFor(existed, etag));
     if (modified) return next;
     // Someone else wrote in between our read and our write — loop and retry
     // against whatever is there now instead of clobbering it.
@@ -127,14 +134,14 @@ async function updateState(store, mutate) {
 // Read-only path (GET): apply the weekly rollover if needed, but don't force
 // a write when nothing has changed.
 async function getStateForRead(store) {
-  const { data, etag } = await readCurrent(store);
+  const { data, etag, existed } = await readCurrent(store);
   const normalized = normalize(data);
   const currentWeek = isoWeekKey(new Date());
   if (normalized.week === currentWeek) {
     return normalized;
   }
   const rolled = { week: currentWeek, ticks: emptyTicks(), history: normalized.history || [] };
-  const { modified } = await store.setJSON(DOC_KEY, rolled, writeOptionsFor(etag));
+  const { modified } = await store.setJSON(DOC_KEY, rolled, writeOptionsFor(existed, etag));
   if (modified) return rolled;
   // Another request rolled it over first — just read the fresh result.
   const { data: freshData } = await readCurrent(store);
