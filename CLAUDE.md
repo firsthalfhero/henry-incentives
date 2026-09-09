@@ -73,10 +73,10 @@ Netlify Blobs store (`getStore("henry-chart")`, key `"state"`):
 ## Activities (`activities.json`)
 
 The list of earning activities — currently Violin practice, Schoolwork, Reading — lives
-in `site/activities.json`, a plain JSON array, published as a static file (so it's
-fetched at `/activities.json`) and also imported directly by `state.mjs`. It's the single
-source of truth: nothing about the activities is hardcoded in `index.template.html` or
-`state.mjs` any more.
+in `site/activities.json`, published as a static file (so it's fetched at
+`/activities.json`) and also imported directly by `state.mjs`. It's the single source of
+truth: nothing about the activities or the pay schedule is hardcoded in
+`index.template.html` or `state.mjs` any more.
 
 The file is one JSON object, not a bare array:
 
