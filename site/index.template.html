@@ -632,7 +632,9 @@
   function buildRates(baseRate, increment){
     var rates = [];
     for(var i = 0; i < 7; i++){
-      rates.push(Math.round((baseRate + i * increment) * 100) / 100);
+      var tier = tierFor(i);
+      var step = tier === 't1' ? 0 : (tier === 't2' ? 1 : 2);
+      rates.push(Math.round((baseRate + step * increment) * 100) / 100);
     }
     return rates;
   }

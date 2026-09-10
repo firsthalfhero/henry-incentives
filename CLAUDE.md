@@ -118,15 +118,18 @@ The file is one JSON object, not a bare array:
 
 ### Pay rate & multiplier
 
-- `baseRate` and `increment` (top-level, shared across all activities) define the day-1..7
-  pay schedule: day *i* (1-indexed) pays `baseRate + (i − 1) × increment`. With the
-  defaults above that's $2.00, $2.50, $3.00 … up to $5.00 on day 7 — the same schedule as
-  before, just no longer hardcoded. Change `baseRate` to shift the whole schedule up or
-  down; change `increment` to make it climb faster or slower.
+- `baseRate` and `increment` (top-level, shared across all activities) define a pay
+  schedule that steps up once per tier, not once per tick: the 1st–3rd time that activity
+  is ticked in a week (Tier 1) pays `baseRate`, the 4th–5th time (Tier 2) pays `baseRate +
+  increment`, the 6th–7th time (Tier 3) pays `baseRate + 2 × increment`. With the defaults
+  above that's $2.00 for the first three, $2.50 for the next two, $3.00 for the last two.
+  Change `baseRate` to shift the whole schedule up or down; change `increment` to make the
+  jump between tiers bigger or smaller.
 - Each activity's own `multiplier` scales its result: `1` (or omitting the field) is the
   standard rate, `1.5` pays that activity 50% more than the schedule, `0.5` pays half.
-  It applies to every day of that activity independently — e.g. with the defaults, a
-  `0.5`-multiplier activity pays $1.00/$1.25/$1.50… instead of $2.00/$2.50/$3.00…
+  It applies to every tier of that activity independently — e.g. with the defaults, a
+  `0.5`-multiplier activity pays $1.00/$1.25/$1.50 across the three tiers instead of
+  $2.00/$2.50/$3.00.
 - Both the client (`index.template.html`, in `buildRates()`/`computeRow()`) and the server
   (`state.mjs`, in `buildRates()`/`computeTotals()`) derive their rate table and apply the
   multiplier the same way from the same `activities.json` — this is no longer duplicated
@@ -152,14 +155,17 @@ Deploying below). No code or template change needed.
 
 ## Rates, tiers, cap
 
-- The day 1..7 rate schedule comes from `activities.json`'s `baseRate`/`increment` (see
+- The per-tier rate schedule comes from `activities.json`'s `baseRate`/`increment` (see
   "Pay rate & multiplier" above), scaled per activity by its `multiplier`. With the
-  defaults ($2.00 base, $0.50 increment, multiplier 1) that's the same $2.00 → $5.00
-  schedule as before — max $24.50/activity/week before any multiplier.
+  defaults ($2.00 base, $0.50 increment, multiplier 1) that's $2.00 / $2.50 / $3.00 across
+  the three tiers — max $17.00/activity/week before any multiplier.
 - Tiers, per activity, by how many days of *that activity* are ticked so far this week:
   days 1–3 = Tier 1 "Getting going" (cool slate), days 4–5 = Tier 2 "Weekly target"
-  (gold), days 6–7 = Tier 3 "Bonus" (plum, dashed border). Tiers are based on which day
-  it is, not the dollar amount, so they're unaffected by `multiplier`.
+  (gold), days 6–7 = Tier 3 "Bonus" (plum, dashed border). These same boundaries now drive
+  the pay schedule too (not just display colour), via `tierFor()` in
+  `index.template.html` and `tierIndexFor()` in `state.mjs` — see "Things to keep in sync"
+  below. Tiers are based on which day it is, not the dollar amount, so they're unaffected
+  by `multiplier`.
 - `SPEND_CAP = 40` — anything earned over $40/week across *all* activities combined goes
   to savings instead of spending money. This is still a plain constant, duplicated in
   `index.template.html` and `state.mjs` (see "Things to keep in sync" below).
@@ -233,12 +239,14 @@ triggers the same build-and-deploy automatically — no `netlify deploy` needed.
 
 ## Things to keep in sync when editing
 
-`SPEND_CAP` is the only thing still duplicated by hand: **both**
-`site/index.template.html` and `site/netlify/functions/state.mjs` declare
-`SPEND_CAP = 40` at the top of the file — kept in sync manually, since the server
-independently recomputes totals for the reset history rather than trusting the client.
-(The 1–3 / 4–5 / 6–7 tier boundaries are purely a client-side display thing — coloured
-via `tierFor()` in `index.template.html` — the server doesn't need them.)
+`SPEND_CAP` and the 1–3 / 4–5 / 6–7 tier boundaries are the things still duplicated by
+hand: **both** `site/index.template.html` and `site/netlify/functions/state.mjs` declare
+`SPEND_CAP = 40` at the top of the file, and both independently encode the same tier
+boundaries — `tierFor()` in `index.template.html`, `tierIndexFor()` in `state.mjs` — kept
+in sync manually, since the server independently recomputes totals for the reset history
+rather than trusting the client. The tier boundaries now feed `buildRates()` in both
+files (not just display colour in the client), so if they ever change, update both
+functions together.
 
 Everything else — the activity list, `baseRate`, `increment`, and each activity's
 `multiplier` — is **not** duplicated. Both files read it from `site/activities.json` (see

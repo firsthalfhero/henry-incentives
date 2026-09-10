@@ -7,13 +7,21 @@ const DOC_KEY = "state";
 const SPEND_CAP = 40;
 const RATE_DAYS = 7; // Mon..Sun
 
-// The day-by-day pay schedule (day 1 = baseRate, each following day adds
-// increment) and the activity list both come from activities.json — the
-// same file the page fetches — so nothing here is hardcoded any more.
+// The pay schedule steps up once per tier, not once per tick: ranks 0-2 pay
+// baseRate, ranks 3-4 pay baseRate + increment, ranks 5-6 pay baseRate + 2 *
+// increment. Tier boundaries mirror tierFor() in index.template.html — kept
+// in sync manually, same as SPEND_CAP below. The activity list and
+// baseRate/increment themselves both come from activities.json — the same
+// file the page fetches — so nothing here is hardcoded any more.
+function tierIndexFor(rankIdx) {
+  if (rankIdx < 3) return 0;
+  if (rankIdx < 5) return 1;
+  return 2;
+}
 function buildRates(baseRate, increment) {
   const rates = [];
   for (let i = 0; i < RATE_DAYS; i++) {
-    rates.push(Number((baseRate + i * increment).toFixed(2)));
+    rates.push(Number((baseRate + tierIndexFor(i) * increment).toFixed(2)));
   }
   return rates;
 }
