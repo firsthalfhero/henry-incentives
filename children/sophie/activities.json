@@ -1,0 +1,28 @@
+{
+  "childName": "Sophie",
+  "baseRate": 1.0,
+  "increment": 0.25,
+  "spendCap": 20,
+  "activities": [
+    {
+      "key": "placeholder-one",
+      "name": "PLACEHOLDER — replace me",
+      "duration": "10 min",
+      "note": "Example activity only. George: edit activities.json with Sophie's real activities, colors, and icon.",
+      "color": "#C2568C",
+      "tint": "#F6DCEA",
+      "multiplier": 1,
+      "icon": null
+    },
+    {
+      "key": "placeholder-two",
+      "name": "PLACEHOLDER — replace me",
+      "duration": "15 min",
+      "note": "Example activity only. George: edit activities.json with Sophie's real activities, colors, and icon.",
+      "color": "#7A4FA0",
+      "tint": "#E7E1F0",
+      "multiplier": 1,
+      "icon": null
+    }
+  ]
+}

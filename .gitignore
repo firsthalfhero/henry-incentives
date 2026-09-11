@@ -1,5 +1,9 @@
-site/node_modules/
-site/.netlify/
-site/deploy-*.zip
-site/index.html
-site/state.json
+children/*/node_modules/
+children/*/.netlify/
+children/*/deploy-*.zip
+children/*/index.html
+children/*/state.json
+.netlify/
+
+# site/ is mid-migration to children/henry/ — remove this line once it's deleted
+site/

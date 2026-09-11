@@ -1,29 +1,9 @@
-<title>Henry's Weekly Earning Chart</title>
+<title>Weekly Earning Chart</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
   :root{
-    --paper:      #EEF1EA;
-    --paper-deep: #E4E8DE;
-    --line:       #CDD4C6;
-    --ink:        #1E2B22;
-    --ink-soft:   #55635A;
-    --gold:       #B8842E;
-    --gold-tint:  #F1E3C6;
-    --violin:     #9A4B2E;
-    --violin-tint:#F3E2D8;
-    --school:     #2E6F9E;
-    --school-tint:#DCEAF3;
-    --reading:    #3F7D53;
-    --reading-tint:#DEEBE1;
-    --savings:    #6FBE8E;
-    --tier1:      #4C5B6B;
-    --tier1-tint: #DEE4EA;
-    --tier1-line: #93A2B1;
-    --tier3:      #7A4A8F;
-    --tier3-tint: #E8DCEE;
-    --error:      #A6403A;
-    --error-tint: #F5DEDC;
+    /* __THEME_VARS__ */
   }
 
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -271,7 +251,7 @@
     padding:5px 2px;
   }
   .day-cell:active{ transform:scale(.94); }
-  .day-cell:focus-visible{ outline:3px solid var(--school); outline-offset:2px; }
+  .day-cell:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
   .day-cell:disabled{ opacity:.55; cursor:default; }
 
   .day-cell .mini-box{
@@ -440,11 +420,11 @@
 
   <header>
     <div class="eyebrow">
-      <span class="eyebrow-text">Henry's weekly earning chart · resets every week</span>
+      <span class="eyebrow-text" id="eyebrowText">Weekly earning chart · resets every week</span>
       <span class="mode-badge" id="modeBadge" hidden>Parent view</span>
     </div>
     <h1>Each activity earns a little more.</h1>
-    <div class="sub">Each activity has its own week below — tap the days you do them. Doing extra reading doesn't cover skipping violin; they're tracked separately. Earn more than $40 in a week and the extra goes straight to savings.</div>
+    <div class="sub">Each activity has its own week below — tap the days you do them. Doing extra on one doesn't cover skipping another — they're tracked separately. Earn more than <span class="cap-amount">$40</span> in a week and the extra goes straight to savings.</div>
   </header>
 
   <section class="block">
@@ -488,16 +468,16 @@
       <span class="stat-label">To savings</span>
       <span class="stat-value" id="savingsValue">$0.00</span>
     </div>
-    <div class="savings-note">Anything earned over $40 in a week goes straight to savings.</div>
+    <div class="savings-note">Anything earned over <span class="cap-amount">$40</span> in a week goes straight to savings.</div>
   </div>
 
   <div class="accordions">
     <details class="acc">
       <summary>How this works</summary>
       <div class="acc-body">
-        <p><b>Each activity has its own week.</b> Violin, schoolwork and reading are tracked separately — extra reading doesn't make up for skipping violin.</p>
+        <p><b>Each activity has its own week.</b> Each one is tracked separately — doing extra on one doesn't make up for skipping another.</p>
         <p><b>The price climbs as you go</b> — for each activity, your first day of the week pays the least, your seventh pays the most. Fresh start every week, no penalty for a quiet one.</p>
-        <p><b>Over $40 in a week?</b> You still earn every dollar — anything past $40 is automatically set aside as savings rather than handed over as spending money.</p>
+        <p><b>Over <span class="cap-amount">$40</span> in a week?</b> You still earn every dollar — anything past <span class="cap-amount">$40</span> is automatically set aside as savings rather than handed over as spending money.</p>
         <p><b>One shared chart.</b> This page has no memory of its own — every tap is saved straight away, so it looks the same on every device.</p>
       </div>
     </details>
@@ -505,7 +485,7 @@
     <details class="acc">
       <summary>Getting paid</summary>
       <div class="acc-body">
-        <p>At the end of the week, show <b>Mum or Dad</b> your total to get paid — up to $40 as spending money, plus whatever's gone to savings.</p>
+        <p>At the end of the week, show <b>Mum or Dad</b> your total to get paid — up to <span class="cap-amount">$40</span> as spending money, plus whatever's gone to savings.</p>
         <p>Mum or Dad will reset the chart for the new week — or it resets itself automatically once the new week starts.</p>
       </div>
     </details>
@@ -649,7 +629,16 @@
         var baseRate = (data && typeof data.baseRate === 'number') ? data.baseRate : 2;
         var increment = (data && typeof data.increment === 'number') ? data.increment : 0.5;
         RATES = buildRates(baseRate, increment);
+        SPEND_CAP = (data && typeof data.spendCap === 'number') ? data.spendCap : SPEND_CAP;
         ACTIVITIES = (data && Array.isArray(data.activities) ? data.activities : []).slice(0, 6);
+
+        var childName = (data && typeof data.childName === 'string' && data.childName) ? data.childName : 'Your';
+        document.title = childName + "'s Weekly Earning Chart";
+        document.getElementById('eyebrowText').textContent = childName + "'s weekly earning chart · resets every week";
+        var capText = '$' + (SPEND_CAP % 1 === 0 ? SPEND_CAP.toFixed(0) : SPEND_CAP.toFixed(2));
+        var capEls = document.querySelectorAll('.cap-amount');
+        for(var i = 0; i < capEls.length; i++){ capEls[i].textContent = capText; }
+
         renderEarners();
       })
       .catch(function(err){

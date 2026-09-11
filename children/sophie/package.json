@@ -1,0 +1,12 @@
+{
+  "name": "sophie-earning-chart",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sophie's weekly earning chart — stateless frontend backed by a Netlify Function + Netlify Blobs. Shares core template/build/logic with children/henry via ../../core.",
+  "dependencies": {
+    "@netlify/blobs": "^11.0.3"
+  },
+  "scripts": {
+    "build": "node ../../core/build.mjs"
+  }
+}

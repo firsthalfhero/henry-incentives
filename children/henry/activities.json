@@ -1,6 +1,8 @@
 {
+  "childName": "Henry",
   "baseRate": 2.0,
   "increment": 0.5,
+  "spendCap": 40,
   "activities": [
     {
       "key": "violin",
